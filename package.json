@@ -1,0 +1,37 @@
+{
+  "name": "nodebb-plugin-tdwtf-articles",
+  "version": "0.0.1",
+  "description": "Article Feed for TDWTF",
+  "main": "library.js",
+  "nbbpm": {
+    "compatibility": "^1.0.0"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "eslint . && npm run unit_tests",
+    "unit_tests": "istanbul cover _mocha -- ./tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NedFodder/nodebb-plugin-tdwtf-articles.git"
+  },
+  "keywords": [],
+  "author": "NedFodder",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NedFodder/nodebb-plugin-tdwtf-articles/issues"
+  },
+  "homepage": "https://github.com/NedFodder/nodebb-plugin-tdwtf-articles#readme",
+  "devDependencies": {
+    "async": "^2.0.0-rc.5",
+    "chai": "^3.5.0",
+    "eslint": "^2.11.1",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.5.3",
+    "request": "^2.44.0",
+    "winston": "^2.2.0"
+  },
+  "dependencies": {
+    "cron": "^1.1.0"
+  }
+}

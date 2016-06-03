@@ -1,0 +1,19 @@
+{
+	"id": "nodebb-plugin-tdwtf-articles",
+	"name": "Article Feed for TDWTF",
+	"description": "Article Feed for TDWTF",
+	"url": "https://github.com/NedFodder/nodebb-tdwtf-articles.git",
+	"library": "./library.js",
+	"hooks": [
+		{ "hook": "static:app.load", "method": "init" },
+		{ "hook": "filter:admin.header.build", "method": "adminMenu" },
+		{ "hook": "filter:plugins.clearRequireCache", "method": "onClearRequireCache" },
+        { "hook": "action:plugin.deactivate", "method": "adminDeactivate" }
+	],
+	"less": [],
+	"acpScripts": [
+		"public/scripts/admin.js"
+	],
+	"templates": "public/templates"
+}
+
