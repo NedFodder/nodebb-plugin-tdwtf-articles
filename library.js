@@ -6,6 +6,7 @@ var socketAdmin;
 var request;
 var user;
 var topics;
+var privileges;
 var meta;
 var db;
 var nconf;
@@ -20,6 +21,7 @@ var tdwtfArticles = function(imports) { // eslint-disable-line complexity
 	request = imports.request || module.parent.require('request');
 	user = imports.user || module.parent.require('./user');
 	topics = imports.topics || module.parent.require('./topics');
+	privileges = imports.privileges || module.parent.require('./privileges');
 	meta = imports.meta || module.parent.require('./meta');
 	db = imports.db || module.parent.require('./database');
 	nconf = imports.nconf || module.parent.require('nconf');
@@ -223,8 +225,19 @@ tdwtfArticles.postArticle = function(entry, callback) {
 			user.getUidByUsername(username, next);
 		},
 		function(_uid, next) {
-			uid = _uid || 1;
-		
+			privileges.categories.get(config.category, _uid, next);
+		},
+		function(privilegesData, next) {
+			
+			if (privilegesData['topics:create']) {
+				uid = privilegesData.uid;
+			} else {
+				winston.error('[nodebb-plugin-tdwtf-articles] User ' + privilegesData.uid +
+					' does not have permission to create topics in Category ' + privilegesData.cid +
+					', posting as User 1');
+				uid = 1;
+			}
+			
 			var tags = [];
 			if (config.tags) {
 				tags = config.tags.split(',');

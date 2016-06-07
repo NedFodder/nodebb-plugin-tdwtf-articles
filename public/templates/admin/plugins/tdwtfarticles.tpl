@@ -75,6 +75,11 @@
 				<div class="panel-heading">Authors</div>
 				<div class="panel-body">
 					<div class="col-sm-12 col-xs-12">
+						If a front page author has a forum account, enter their name
+						(as it appears on TDWTF) and their user name. Their account must
+						have permissions to post to the category specified above.
+					</div>
+					<div class="col-sm-12 col-xs-12">
 						<div class="form-group">
 							<div class="row">
 								<div class="col-sm-3 col-xs-12">

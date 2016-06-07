@@ -17,6 +17,7 @@ const socketAdmin = {};
 socketAdmin.settings = {};
 const user = {};
 const topics = {};
+const privileges = {};
 const meta = {};
 const db = {};
 const nconf = {};
@@ -28,6 +29,7 @@ const imports = {
 	request: request,
 	user: user,
 	topics: topics,
+	privileges: privileges,
 	meta: meta,
 	db: db,
 	nconf: nconf,
