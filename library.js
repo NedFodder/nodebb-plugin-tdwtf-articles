@@ -172,8 +172,8 @@ tdwtfArticles.processYahooEntries = function(entries, callback) {
 				next();
 			}
 		}
-	}, function() {
-		callback(null, mostRecent);
+	}, function(err) {
+		callback(err, mostRecent);
 	});
 };
 
@@ -218,7 +218,10 @@ tdwtfArticles.postArticle = function(entry, callback) {
 	var uid;
 	
 	async.waterfall([
-		async.apply(user.getUidByUsername, config.userName),
+		function(next) {
+			var username = getAuthorUserName(config.authors, entry.author.name) || config.userName;
+			user.getUidByUsername(username, next);
+		},
 		function(_uid, next) {
 			uid = _uid || 1;
 		
@@ -229,10 +232,6 @@ tdwtfArticles.postArticle = function(entry, callback) {
 		
 			var link = (entry.link && entry.link.href) ? entry.link.href : '';
 			var content = link + '\n\nBy ' + entry.author.name;
-			var username = getAuthorUserName(config.authors, entry.author.name);
-			if (username) {
-				content = content + ' @' + username + ' ';
-			}
 			if (entry.category && entry.category.term) {
 				content = content + ' in ' + entry.category.term;
 			}

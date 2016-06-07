@@ -37,7 +37,7 @@
 						
 						<div class="col-sm-2 col-xs-12">
 							<div class="form-group">
-								<label for="userName">User</label>
+								<label for="userName">Default User</label>
 								<input class="form-control article-user" type="text" data-key="userName" placeholder="User to post as" value="" />
 							</div>
 						</div>
