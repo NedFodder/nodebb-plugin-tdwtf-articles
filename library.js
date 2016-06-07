@@ -107,9 +107,15 @@ tdwtfArticles.init = function(data, callback) {
 		latestDate: 0,
 		category: 1,
 		tags: '',
-		userName: ''
+		userName: '',
+		authors: [
+			{name: 'Alex Papadimoulis', user: 'apapadimoulis'}
+		]
 	};
-	tdwtfArticles.settings = new Settings('tdwtfarticles', '0.4', defaultSettings, tdwtfArticles.syncSettings);
+	tdwtfArticles.settings = new Settings('tdwtfarticles', '0.5', defaultSettings, tdwtfArticles.syncSettings);
+	socketAdmin.settings.getTdwtfArticlesDefaults = function (socket, _, next) {
+		next(null, tdwtfArticles.settings.createDefaultWrapper());
+	};
 	
 	callback();
 };
@@ -144,6 +150,7 @@ tdwtfArticles.getFeedFromYahoo = function(url, entries, callback) {
 };
 
 // post articles from the YQL feed
+// but only if they're newer than latest posted article
 tdwtfArticles.processYahooEntries = function(entries, callback) {
 	entries = Array.isArray(entries) ? entries : [entries];
 
@@ -192,6 +199,16 @@ function setTimestampToArticlePublishedDate(data, entry) {
 		'cid:' + topicData.cid + ':pids'
 	], timestamp, pid);
 }
+
+// get the forum user name from an author's real name, or null
+function getAuthorUserName(authors, name) {
+	for (var i = 0; i < authors.length; i++) {
+		if (authors[i].name === name) {
+			return authors[i].user;
+		}
+	}
+	return null;
+}
 	
 // post the article
 tdwtfArticles.postArticle = function(entry, callback) {
@@ -211,7 +228,11 @@ tdwtfArticles.postArticle = function(entry, callback) {
 			}
 		
 			var link = (entry.link && entry.link.href) ? entry.link.href : '';
-			var content = link + '\n\nBy ' + entry.author.name; // TODO: lookup forum user name
+			var content = link + '\n\nBy ' + entry.author.name;
+			var username = getAuthorUserName(config.authors, entry.author.name);
+			if (username) {
+				content = content + ' @' + username + ' ';
+			}
 			if (entry.category && entry.category.term) {
 				content = content + ' in ' + entry.category.term;
 			}

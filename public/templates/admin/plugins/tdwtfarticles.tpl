@@ -2,14 +2,21 @@
 	<div class="col-lg-9">
 		<form class="form tdwtfarticles-settings">
 			<div class="panel panel-default">
+				<div class="panel-heading">RSS Feed</div>
 				<div class="panel-body">
 					<div class="row">
 					
 						<div class="col-sm-12 col-xs-12">
 							<div class="form-group">
-								<label for="url">RSS Feed URL</label>
+								<!--<input type="checkbox" data-key="enabled">Enable RSS Feed</input>-->
+								<label for="enabled">
+									<input type="checkbox" data-key="enabled"></input>
+									Enable RSS Feed
+								</label>
+							</div>
+							<div class="form-group">
+								<label for="url">URL</label>
 								<input class="form-control" type="text" data-key="url" placeholder="http://" />
-								<input id="collapseWhiteSpace" type="checkbox" data-key="enabled">Enable RSS Feed</input>
 							</div>
 						</div>
 						
@@ -64,7 +71,38 @@
 					</div>
 				</div>
 			</div>
-			<button class="btn btn-primary" id="save">Save Settings</button>
+			<div class="panel panel-default">
+				<div class="panel-heading">Authors</div>
+				<div class="panel-body">
+					<div class="col-sm-12 col-xs-12">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-3 col-xs-12">
+									<label>Real Name</label>
+								</div>
+								<div class="col-sm-3 col-xs-12">
+									<label>User Name</label>
+								</div>
+							</div>
+							<div class="authors" data-key="authors" data-type="articleAuthor" ></div>
+						</div>
+						<button class="btn btn-primary" id="add-author">Add Author</button>
+					</div>
+				</div>
+			</div>
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<div class="col-sm-3">
+						<button class="btn btn-primary btn-block" id="save">Save Settings</button>
+					</div>
+					<div class="col-sm-3">
+						<button class="btn btn-block" id="reset">Undo Changes</button>
+					</div>
+					<div class="col-sm-3">
+						<button class="btn btn-danger btn-block" id="restore">Restore Defaults</button>
+					</div>
+				</div>
+			</div>
 		</form>
 	</div>
 </div>
