@@ -8,7 +8,6 @@
 					
 						<div class="col-sm-12 col-xs-12">
 							<div class="form-group">
-								<!--<input type="checkbox" data-key="enabled">Enable RSS Feed</input>-->
 								<label for="enabled">
 									<input type="checkbox" data-key="enabled"></input>
 									Enable RSS Feed
@@ -25,6 +24,10 @@
 								<div class="form-group">
 									<label>Category</label>
 									<select class="form-control article-category" type="number" data-key="category"></select>
+									<label for="enabled">
+										<input type="checkbox" data-key="tagWithCategory"></input>
+										Tag post with Category
+									</label>
 								</div>
 							</div>
 							<div class="col-sm-9 col-xs-12">

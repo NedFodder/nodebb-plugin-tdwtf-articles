@@ -108,6 +108,7 @@ tdwtfArticles.init = function(data, callback) {
 		timestamp: 'now',
 		latestDate: 0,
 		category: 1,
+		tagWithCategory: 1,
 		tags: '',
 		userName: '',
 		authors: [
@@ -211,7 +212,34 @@ function getAuthorUserName(authors, name) {
 	}
 	return null;
 }
-	
+
+tdwtfArticles.createPost = function(entry, uid) {
+	var tags = [];
+	if (config.tags) {
+		tags = config.tags.split(',');
+	}
+
+	var link = (entry.link && entry.link.href) ? entry.link.href : '';
+	var content = link + '\n\nBy ' + entry.author.name;
+	if (entry.category && entry.category.term) {
+		content = content + ' in ' + entry.category.term;
+		if (config.tagWithCategory) {
+			tags.push(entry.category.term);
+		}
+	}
+	var date = new Date(entry.published).toISOString().slice(0, 10);
+	content = content + ' on ' + date;
+
+	var topicData = {
+		uid: uid,
+		title: entry.title,
+		content: content,
+		cid: config.category,
+		tags: tags
+	};
+	return topicData;
+};
+
 // post the article
 tdwtfArticles.postArticle = function(entry, callback) {
 
@@ -238,27 +266,7 @@ tdwtfArticles.postArticle = function(entry, callback) {
 				uid = 1;
 			}
 			
-			var tags = [];
-			if (config.tags) {
-				tags = config.tags.split(',');
-			}
-		
-			var link = (entry.link && entry.link.href) ? entry.link.href : '';
-			var content = link + '\n\nBy ' + entry.author.name;
-			if (entry.category && entry.category.term) {
-				content = content + ' in ' + entry.category.term;
-			}
-			var date = new Date(entry.published).toISOString().slice(0, 10);
-			content = content + ' on ' + date;
-		
-			var topicData = {
-				uid: uid,
-				title: entry.title,
-				content: content,
-				cid: config.category,
-				tags: tags
-			};
-			
+			var topicData = tdwtfArticles.createPost(entry, uid);
 			topics.post(topicData, next);
 		},
 		function(data, next) {
