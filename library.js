@@ -42,14 +42,14 @@ function renderAdmin(req, res, next) { // eslint-disable-line no-unused-vars
 	res.render('admin/plugins/tdwtfarticles', {});
 }
 
-var config = {};
+tdwtfArticles.config = {};
 
 var cronJobs = [];
 
 function restartCronJobs() {
 	if (nconf.get('isPrimary') === 'true') {
 		stopCronJobs();
-		cronJobs[config.interval].start();
+		cronJobs[tdwtfArticles.config.interval].start();
 	}
 }
 function stopCronJobs() {
@@ -73,8 +73,8 @@ tdwtfArticles.onClearRequireCache = function(data, callback) {
 
 // reload settings and restart cron jobs
 tdwtfArticles.syncSettings = function() {
-	config = tdwtfArticles.settings.get();
-	if (config.enabled) {
+	tdwtfArticles.config = tdwtfArticles.settings.get();
+	if (tdwtfArticles.config.enabled) {
 		restartCronJobs();
 	} else {
 		stopCronJobs();
@@ -112,7 +112,7 @@ tdwtfArticles.init = function(data, callback) {
 		tags: '',
 		userName: '',
 		authors: [
-			{name: 'Alex Papadimoulis', user: 'apapadimoulis'}
+			{ name: 'Alex Papadimoulis', user: 'apapadimoulis' }
 		]
 	};
 	tdwtfArticles.settings = new Settings('tdwtfarticles', '0.5', defaultSettings, tdwtfArticles.syncSettings);
@@ -155,9 +155,9 @@ tdwtfArticles.getFeedFromYahoo = function(url, entries, callback) {
 // post articles from the YQL feed
 // but only if they're newer than latest posted article
 tdwtfArticles.processYahooEntries = function(entries, callback) {
-	entries = Array.isArray(entries) ? entries : [entries];
+	entries = Array.isArray(entries) ? entries : [ entries ];
 
-	var mostRecent = config.latestDate;
+	var mostRecent = tdwtfArticles.config.latestDate;
 	var entryDate;
 	entries = entries.filter(Boolean);
 	async.eachSeries(entries, function(obj, next) {
@@ -166,7 +166,7 @@ tdwtfArticles.processYahooEntries = function(entries, callback) {
 			next();
 		} else {
 			entryDate = new Date(entry.published).getTime();
-			if (entryDate > config.latestDate) {
+			if (entryDate > tdwtfArticles.config.latestDate) {
 				if (entryDate > mostRecent) {
 					mostRecent = entryDate;
 				}
@@ -215,15 +215,15 @@ function getAuthorUserName(authors, name) {
 
 tdwtfArticles.createPost = function(entry, uid) {
 	var tags = [];
-	if (config.tags) {
-		tags = config.tags.split(',');
+	if (tdwtfArticles.config.tags) {
+		tags = tdwtfArticles.config.tags.split(',');
 	}
 
 	var link = (entry.link && entry.link.href) ? entry.link.href : '';
 	var content = link + '\n\nBy ' + entry.author.name;
 	if (entry.category && entry.category.term) {
 		content = content + ' in ' + entry.category.term;
-		if (config.tagWithCategory) {
+		if (tdwtfArticles.config.tagWithCategory) {
 			tags.push(entry.category.term);
 		}
 	}
@@ -234,7 +234,7 @@ tdwtfArticles.createPost = function(entry, uid) {
 		uid: uid,
 		title: entry.title,
 		content: content,
-		cid: config.category,
+		cid: tdwtfArticles.config.category,
 		tags: tags
 	};
 	return topicData;
@@ -249,18 +249,18 @@ tdwtfArticles.postArticle = function(entry, callback) {
 	
 	async.waterfall([
 		function(next) {
-			var username = getAuthorUserName(config.authors, entry.author.name) || config.userName;
+			var username = getAuthorUserName(tdwtfArticles.config.authors, entry.author.name) || tdwtfArticles.config.userName;
 			user.getUidByUsername(username, next);
 		},
 		function(_uid, next) {
-			privileges.categories.get(config.category, _uid, next);
+			privileges.categories.get(tdwtfArticles.config.category, _uid, next);
 		},
 		function(privilegesData, next) {
 			
 			if (privilegesData['topics:create']) {
 				uid = privilegesData.uid;
 			} else {
-				winston.error('[nodebb-plugin-tdwtf-articles] User ' + privilegesData.uid +
+				winston.warn('[nodebb-plugin-tdwtf-articles] User ' + privilegesData.uid +
 					' does not have permission to create topics in Category ' + privilegesData.cid +
 					', posting as User 1');
 				uid = 1;
@@ -270,7 +270,7 @@ tdwtfArticles.postArticle = function(entry, callback) {
 			topics.post(topicData, next);
 		},
 		function(data, next) {
-			if (config.timestamp === 'article') {
+			if (tdwtfArticles.config.timestamp === 'article') {
 				setTimestampToArticlePublishedDate(data, entry);
 			}
 			var max = Math.max(parseInt(meta.config.postDelay, 10) || 10, parseInt(meta.config.newbiePostDelay, 10) || 10) + 1;
@@ -282,7 +282,7 @@ tdwtfArticles.postArticle = function(entry, callback) {
 
 // save date of latest post to the database
 tdwtfArticles.saveLatestDate = function(mostRecent, callback) {
-	if (mostRecent > tdwtfArticles.settings.get('latestDate')) {
+	if (mostRecent > tdwtfArticles.config.latestDate) {
 		tdwtfArticles.settings.set('latestDate', mostRecent);
 		tdwtfArticles.settings.persist(callback);
 	} else {
@@ -294,15 +294,19 @@ tdwtfArticles.saveLatestDate = function(mostRecent, callback) {
 tdwtfArticles.getArticles = function() {
 
 	winston.verbose('[nodebb-plugin-tdwtf-articles] Getting articles from RSS feed.');
-	async.waterfall([
-		async.apply(tdwtfArticles.getFeedFromYahoo, config.url, config.entries),
-		tdwtfArticles.processYahooEntries,
-		tdwtfArticles.saveLatestDate
-	], function(err) {
-		if (err) {
-			winston.error('[nodebb-plugin-tdwtf-articles] Error: ' + err.message);
-		}
-	});
+	try {
+		async.waterfall([
+			async.apply(tdwtfArticles.getFeedFromYahoo, tdwtfArticles.config.url, tdwtfArticles.config.entries),
+			tdwtfArticles.processYahooEntries,
+			tdwtfArticles.saveLatestDate
+		], function(err) {
+			if (err) {
+				winston.error('[nodebb-plugin-tdwtf-articles] Error: ' + err.message);
+			}
+		});
+	} catch (e) {
+		winston.error('[nodebb-plugin-tdwtf-articles] Error: ' + e.message);
+	}
 
 };
 

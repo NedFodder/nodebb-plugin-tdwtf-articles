@@ -29,6 +29,7 @@
     "istanbul": "^0.4.3",
     "mocha": "^2.5.3",
     "request": "^2.44.0",
+    "sinon": "^1.17.4",
     "winston": "^2.2.0"
   },
   "dependencies": {
