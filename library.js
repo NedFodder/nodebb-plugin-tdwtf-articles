@@ -141,7 +141,7 @@ tdwtfArticles.getFeedFromYahoo = function(url, entries, callback) {
 					if (yahooResponse.query.count > 0) {
 						next(null, yahooResponse.query.results.feed);
 					} else {
-						next();
+						next(null, {});
 					}
 				} catch (e) {
 					next(e);
