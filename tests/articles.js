@@ -145,7 +145,7 @@ describe('tdwtfArticles:', () => {
 				const callback = sandbox.spy();
 				tdwtfArticles.getFeedFromYahoo(testUrl, numEntries, callback);
 				callback.called.should.be.true;
-				callback.calledWith(null).should.be.true;
+				callback.calledWith(null, sinon.match.any).should.be.true;
 			});
 		
 		});
@@ -215,11 +215,22 @@ describe('tdwtfArticles:', () => {
 			postArticle.called.should.be.false;
 			callback.calledWith(null, tdwtfArticles.config.latestDate).should.be.true;
 		});
-		it('should post only new articles', () => {
+		it('should post only new articles (newer first)', () => {
 			const callback = sandbox.spy();
 			const expectedDate = new Date(entry3.entry.published).getTime();
-			tdwtfArticles.processYahooEntries([ entry3, entry1, entry2 ], callback);
+			tdwtfArticles.processYahooEntries([ entry3, entry2, entry1 ], callback);
 			postArticle.calledTwice.should.be.true;
+			postArticle.calledWith(entry1.entry, sinon.match.func).should.be.false;
+			postArticle.calledWith(entry2.entry, sinon.match.func).should.be.true;
+			postArticle.calledWith(entry3.entry, sinon.match.func).should.be.true;
+			callback.calledWith(null, expectedDate).should.be.true;
+		});
+		it('should post only new articles (older first)', () => {
+			const callback = sandbox.spy();
+			const expectedDate = new Date(entry3.entry.published).getTime();
+			tdwtfArticles.processYahooEntries([ entry1, entry2, entry3 ], callback);
+			postArticle.calledTwice.should.be.true;
+			postArticle.calledWith(entry1.entry, sinon.match.func).should.be.false;
 			postArticle.calledWith(entry2.entry, sinon.match.func).should.be.true;
 			postArticle.calledWith(entry3.entry, sinon.match.func).should.be.true;
 			callback.calledWith(null, expectedDate).should.be.true;
