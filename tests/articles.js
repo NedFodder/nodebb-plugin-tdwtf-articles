@@ -35,6 +35,7 @@ const meta = {
 	}
 };
 const db = {
+	setObject: () => {},
 	setObjectField: () => {},
 	sortedSetsAdd: () => {}
 };
@@ -145,7 +146,7 @@ describe('tdwtfArticles:', () => {
 				const callback = sandbox.spy();
 				tdwtfArticles.getFeedFromYahoo(testUrl, numEntries, callback);
 				callback.called.should.be.true;
-				callback.calledWith(null, sinon.match.any).should.be.true;
+				callback.calledWithMatch(null, {}).should.be.true;
 			});
 		
 		});
@@ -162,7 +163,7 @@ describe('tdwtfArticles:', () => {
 			postArticle = sandbox.stub(tdwtfArticles, 'postArticle');
 			postArticle.yields();
 			
-			tdwtfArticles.config = {
+			tdwtfArticles.feedInfo = {
 				latestDate: new Date('2016-05-23T10:30:00Z').getTime()
 			};
 			
@@ -199,7 +200,7 @@ describe('tdwtfArticles:', () => {
 			const callback = sandbox.spy();
 			tdwtfArticles.processYahooEntries(entry1, callback);
 			postArticle.called.should.be.false;
-			callback.calledWith(null, tdwtfArticles.config.latestDate).should.be.true;
+			callback.calledWith(null, tdwtfArticles.feedInfo.latestDate).should.be.true;
 		});
 		it('should post a new article', () => {
 			const callback = sandbox.spy();
@@ -213,7 +214,7 @@ describe('tdwtfArticles:', () => {
 			const callback = sandbox.spy();
 			tdwtfArticles.processYahooEntries({}, callback);
 			postArticle.called.should.be.false;
-			callback.calledWith(null, tdwtfArticles.config.latestDate).should.be.true;
+			callback.calledWith(null, tdwtfArticles.feedInfo.latestDate).should.be.true;
 		});
 		it('should post only new articles (newer first)', () => {
 			const callback = sandbox.spy();
@@ -335,8 +336,10 @@ describe('tdwtfArticles:', () => {
 		
 			sandbox = sinon.sandbox.create();
 			
+			tdwtfArticles.feedInfo = {
+				latestDate: new Date('2016-05-23T10:30:00Z').getTime()
+			};
 			tdwtfArticles.config = {
-				latestDate: new Date('2016-05-23T10:30:00Z').getTime(),
 				userName: 'PaulaBean',
 				category: 6,
 				authors: [
@@ -460,7 +463,7 @@ describe('tdwtfArticles:', () => {
 	
 	describe('The article getter', () => {
 	
-		let sandbox, set, persist;
+		let sandbox, dbSetObject;
 		const date1 = new Date('2016-05-23T09:30:00Z').getTime();
 		const date2 = new Date('2016-05-23T10:30:00Z').getTime();
 		const date3 = new Date('2016-05-23T11:30:00Z').getTime();
@@ -469,15 +472,10 @@ describe('tdwtfArticles:', () => {
 		
 			sandbox = sinon.sandbox.create();
 			
-			tdwtfArticles.config = {
+			tdwtfArticles.feedInfo = {
 				latestDate: date2
 			};
-			tdwtfArticles.settings = {
-				set: () => {},
-				persist: () => {}
-			};
-			set = sandbox.spy(tdwtfArticles.settings, 'set');
-			persist = sandbox.spy(tdwtfArticles.settings, 'persist');
+			dbSetObject = sandbox.spy(db, 'setObject');
 			
 		});
 		
@@ -487,15 +485,13 @@ describe('tdwtfArticles:', () => {
 			sandbox.stub(tdwtfArticles, 'getFeedFromYahoo').yields();
 			sandbox.stub(tdwtfArticles, 'processYahooEntries').yields(null, date3);
 			tdwtfArticles.getArticles();
-			set.calledWith('latestDate', date3).should.be.true;
-			persist.called.should.be.true;
+			dbSetObject.calledWith('nodebb-plugin-tdwtf-articles:feedInfo', sinon.match({ latestDate: date3 })).should.be.true;
 		});
 		it('should not save less recent dates', () => {
 			sandbox.stub(tdwtfArticles, 'getFeedFromYahoo').yields();
 			sandbox.stub(tdwtfArticles, 'processYahooEntries').yields(null, date1);
 			tdwtfArticles.getArticles();
-			set.called.should.be.false;
-			persist.called.should.be.false;
+			dbSetObject.called.should.be.false;
 		});
 		it('should log errors', () => {
 			sandbox.stub(tdwtfArticles, 'getFeedFromYahoo').yields();

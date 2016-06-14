@@ -43,6 +43,7 @@ function renderAdmin(req, res, next) { // eslint-disable-line no-unused-vars
 }
 
 tdwtfArticles.config = {};
+tdwtfArticles.feedInfo = {};
 
 var cronJobs = [];
 
@@ -81,6 +82,26 @@ tdwtfArticles.syncSettings = function() {
 	}
 };
 
+tdwtfArticles.getFeedInfo = function(callback) {
+	async.waterfall([
+		async.apply(db.getObject, 'nodebb-plugin-tdwtf-articles:feedInfo'),
+		function(feedInfo, next) {
+			if (feedInfo) {
+				tdwtfArticles.feedInfo = feedInfo;
+			} else {
+				tdwtfArticles.feedInfo = {
+					latestDate: 0
+				};
+			}
+			next();
+		}
+	], callback);
+};
+
+tdwtfArticles.saveFeedInfo = function(callback) {
+	db.setObject('nodebb-plugin-tdwtf-articles:feedInfo', tdwtfArticles.feedInfo, callback);
+};
+
 tdwtfArticles.init = function(data, callback) {
 
 	if (!socketAdmin) {
@@ -106,7 +127,6 @@ tdwtfArticles.init = function(data, callback) {
 		interval: 'hour',
 		entries: 4,
 		timestamp: 'now',
-		latestDate: 0,
 		category: 1,
 		tagWithCategory: 1,
 		tags: '',
@@ -120,7 +140,7 @@ tdwtfArticles.init = function(data, callback) {
 		next(null, tdwtfArticles.settings.createDefaultWrapper());
 	};
 	
-	callback();
+	tdwtfArticles.getFeedInfo(callback);
 };
 
 // use YQL feednormalizer to get RSS feed as an object
@@ -157,7 +177,7 @@ tdwtfArticles.getFeedFromYahoo = function(url, entries, callback) {
 tdwtfArticles.processYahooEntries = function(entries, callback) {
 	entries = Array.isArray(entries) ? entries : [ entries ];
 
-	var mostRecent = tdwtfArticles.config.latestDate;
+	var mostRecent = tdwtfArticles.feedInfo.latestDate;
 	var entryDate;
 	entries = entries.filter(Boolean);
 	async.eachSeries(entries, function(obj, next) {
@@ -166,7 +186,7 @@ tdwtfArticles.processYahooEntries = function(entries, callback) {
 			next();
 		} else {
 			entryDate = new Date(entry.published).getTime();
-			if (entryDate > tdwtfArticles.config.latestDate) {
+			if (entryDate > tdwtfArticles.feedInfo.latestDate) {
 				if (entryDate > mostRecent) {
 					mostRecent = entryDate;
 				}
@@ -282,9 +302,9 @@ tdwtfArticles.postArticle = function(entry, callback) {
 
 // save date of latest post to the database
 tdwtfArticles.saveLatestDate = function(mostRecent, callback) {
-	if (mostRecent > tdwtfArticles.config.latestDate) {
-		tdwtfArticles.settings.set('latestDate', mostRecent);
-		tdwtfArticles.settings.persist(callback);
+	if (mostRecent > tdwtfArticles.feedInfo.latestDate) {
+		tdwtfArticles.feedInfo.latestDate = mostRecent;
+		tdwtfArticles.saveFeedInfo(callback);
 	} else {
 		callback();
 	}
