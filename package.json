@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-tdwtf-articles",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Article Feed for TDWTF",
   "main": "library.js",
   "nbbpm": {
@@ -22,17 +22,19 @@
     "url": "https://github.com/NedFodder/nodebb-plugin-tdwtf-articles/issues"
   },
   "homepage": "https://github.com/NedFodder/nodebb-plugin-tdwtf-articles#readme",
-  "devDependencies": {
-    "async": "^2.0.0-rc.5",
-    "chai": "^3.5.0",
-    "eslint": "^2.11.1",
-    "istanbul": "^0.4.3",
-    "mocha": "^2.5.3",
-    "request": "^2.44.0",
-    "sinon": "^1.17.4",
-    "winston": "^2.2.0"
-  },
   "dependencies": {
     "cron": "^1.1.0"
+  },
+  "devDependencies": {
+    "async": "^2.1.4",
+    "chai": "^3.5.0",
+    "eslint": "^3.12.2",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
+    "eslint-plugin-react": "^6.8.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7"
   }
 }
