@@ -134,7 +134,7 @@ define('admin/plugins/tdwtfarticles', ['settings'], function(settings) {
 		});
 		
 	};
-	
+	app.loadJQueryUI();
 	return tdwtfArticles;
 });
 
